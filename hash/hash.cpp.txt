@@ -1,0 +1,53 @@
+#include <iostream>
+#include <fstream>
+#include <cryptopp/sha.h>
+#include <cryptopp/hex.h>
+
+using namespace CryptoPP;
+using namespace std;
+
+// Функция для вычисления хэша SHA-256 из файла
+string calculateSHA256(const string& filename)
+{
+SHA256 hash;
+
+// Открываем файл для бинарного чтения
+ifstream file(filename, ios::binary);
+if (!file.is_open()) {
+cerr « "Ошибка открытия файла" « endl;
+exit(EXIT_FAILURE);
+}
+
+// Устанавливаем буфер для чтения файла
+const size_t bufferSize = 8192;
+byte buffer[bufferSize];
+
+// Инициализация хэша
+while (!file.eof()) {
+file.read(reinterpret_cast<char*>(buffer), bufferSize);
+hash.Update(buffer, file.gcount());
+}
+
+// Завершение вычисления хэша
+file.close();
+byte hashResult[SHA256::DIGESTSIZE];
+hash.Final(hashResult);
+
+// Преобразование бинарного хэша в строку шестнадцатеричных цифр
+string hexResult;
+StringSource(hashResult, sizeof(hashResult), true, new HexEncoder(new StringSink(hexResult)));
+
+return hexResult;
+}
+
+int main()
+{
+// Замените "example.txt" на имя вашего файла
+const string filename = "/home/stud/Desktop/example.txt";
+
+string hashResult = calculateSHA256(filename);
+
+cout « "Хэш файла " « filename « " (SHA-256): " « hashResult « endl;
+
+return 0;
+}
